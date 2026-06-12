@@ -2,86 +2,92 @@
 
 **Projekt**: Arztpraxis-Dashboard (Terminauslastung)
 **Gesamtbudget**: 3 Stunden
-**Stack**: Angular 17+, Angular Material, Chart.js (ng2-charts), Jasmine/Karma
-**Deployment**: GitHub Pages via GitHub Actions
+**Stack**: Angular 17+, Angular Material, Chart.js (direkt, ohne ng2-charts), Jasmine/Karma
+**Deployment**: GitHub Pages via peaceiris/actions-gh-pages
 
 ---
 
 ## ToDo-Liste (Checkliste)
 
-### Phase 1: Setup & Datenmodell (0:00 – 0:20)
+### Phase 1: Setup & Datenmodell
 
-- [ ] **Angular-Projekt erstellen**: `ng new` mit Standalone Components, Routing deaktiviert
-- [ ] **Dependencies installieren**: `@angular/material`, `ng2-charts`, `chart.js`
-- [ ] **Datenmodell definieren**: TypeScript-Interfaces in `src/app/models/`
-  - `Appointment` (Datum, Uhrzeit, Patient, Behandlungsart, Status)
-  - `WeeklyStats` (aggregierte Kennzahlen pro Woche/Tag)
-- [ ] **Mock-JSON anlegen**: `src/assets/data/termindaten.json`
-- [ ] **Git initialisieren**: Erster Commit nach Projekt-Setup
+- [x] **Angular-Projekt erstellen**: `ng new` mit Standalone Components, Routing deaktiviert
+- [x] **Dependencies installieren**: `@angular/material`, `chart.js`, `puppeteer`
+- [x] **Datenmodell definieren**: TypeScript-Interfaces in `src/app/models/`
+  - `Appointment` (Datum, Uhrzeit, Dauer, Behandlungsart, Arzt, Status, Neupatient)
+  - `DailyStats` / `WeeklyStats` / `TreatmentStat`
+- [x] **Mock-JSON anlegen**: `src/assets/data.json`
+- [x] **Git initialisieren**: Erster Commit nach Projekt-Setup
 
-### Phase 2: DataService & Logik (0:20 – 0:50)
+### Phase 2: DataService & Logik
 
-- [ ] **DataService** (`src/app/services/data.service.ts`):
-  - HTTP-Client / Fetch für JSON laden
+- [x] **DataService** (`src/app/services/data.service.ts`):
+  - HTTP-Client für JSON laden
   - Transformations-Methoden (Rohdaten → Chart-kompatibel)
-  - Berechnung: Auslastung pro Tag/Woche
+  - Berechnung: Auslastung pro Tag/Woche (minutenbasiert)
   - Berechnung: No-Show-Rate
   - Berechnung: Verteilung nach Behandlungsart
-- [ ] **DataService Unit-Tests** (`data.service.spec.ts`):
+- [x] **DataService Unit-Tests** (`data.service.spec.ts`):
   - Laden von Mock-Daten
   - Korrekte Aggregation
   - Edge Cases (leere Tage, fehlende Werte)
 
-### Phase 3: Dashboard & Charts (0:50 – 1:30)
+### Phase 3: Dashboard & Charts
 
-- [ ] **Dashboard-Component** (`DashboardComponent`):
-  - Layout: Header + KPI-Karten + Chart-Bereich
+- [x] **Dashboard-Component** (`DashboardComponent`):
+  - Layout: Toolbar + KPI-Karten + Chart-Bereich
   - Weekly-Utilization-View als primäre Ansicht
-- [ ] **UtilizationChart-Component**:
+- [x] **UtilizationChart-Component**:
   - Balkendiagramm: Auslastung pro Tag (Wochensicht)
+  - Farbcodierung: grün (<60%), gelb (<80%), rot (>80%)
   - Wochen-Navigation (vor/zurück)
-- [ ] **Angular Material** integrieren:
+- [x] **Angular Material** integrieren:
   - `MatCard` für KPI-Karten
   - `MatToolbar` für Header
-  - `MatButton` für Navigation
+  - `MatButton` + `MatIcon` für Navigation
 
-### Phase 4: Zusatz-Views (1:30 – 2:00)
+### Phase 4: Zusatz-Views
 
-- [ ] **NoShowRate-Component**:
-  - Zeigt No-Show-Quote pro Tag/Woche
-  - Farbskala (grün = niedrig, rot = hoch)
-- [ ] **TreatmentDistribution-Component**:
+- [x] **NoShowRate-Component**:
+  - Zeigt No-Show-Quote pro Tag
+  - Farbskala (grün = niedrig, gelb = mittel, rot = hoch, grau = 0)
+- [x] **TreatmentDistribution-Component**:
   - Kuchendiagramm: Anteil der Behandlungsarten
-- [ ] **Responsive Layout**: Material Grid für mobile Ansicht
+- [x] **Responsive Layout**: CSS Grid mit `auto-fit` für mobile Ansicht
 
-### Phase 5: Component Unit-Tests (2:00 – 2:20)
+### Phase 5: Component Unit-Tests
 
-- [ ] **DashboardComponent Tests**:
+- [x] **DashboardComponent Tests**:
   - Korrekte Initialisierung
-  - Anzeige bei leeren Daten
-- [ ] **UtilizationChartComponent Tests**:
-  - Chart-Daten korrekt übergeben
+  - Daten laden und Wochen berechnen
   - Navigation funktioniert
-- [ ] **NoShowRateComponent Tests**
-- [ ] **TreatmentDistributionComponent Tests**
+- [x] **UtilizationChartComponent Tests**:
+  - Chart-Daten korrekt übergeben
+  - Canvas-Element vorhanden
+- [x] **NoShowRateComponent Tests**:
+  - Items pro Tag rendern
+  - Prozentwerte korrekt anzeigen
+  - Farb-Funktion testen
+- [x] **TreatmentDistributionComponent Tests**:
+  - Überschrift und Canvas vorhanden
 
-### Phase 6: GitHub Actions & CI/CD (2:20 – 2:35)
+### Phase 6: GitHub Actions & CI/CD
 
-- [ ] **CI Workflow** (`.github/workflows/ci.yml`):
+- [x] **CI Workflow** (`.github/workflows/ci.yml`):
   - Trigger: push, pull_request
-  - Steps: checkout, node setup, npm ci, lint, test:ci, build
-- [ ] **Deploy Workflow** (`.github/workflows/deploy.yml`):
+  - Steps: checkout, node setup, npm ci, lint, test, build
+- [x] **Deploy Workflow** (`.github/workflows/deploy.yml`):
   - Trigger: push to main
-  - Build Angular App (──base-href)
-  - Deploy to GitHub Pages
-- [ ] **GitHub Pages Settings**: Branch `gh-pages` als Source
+  - Build Angular App mit --base-href
+  - Deploy zu GitHub Pages via peaceiris/actions-gh-pages
+- [x] **GitHub Pages Settings**: Branch `gh-pages` als Source
 
-### Phase 7: Dokumentation & Abschluss (2:35 – 3:00)
+### Phase 7: Dokumentation & Abschluss
 
-- [ ] **README.md** aktualisieren
-- [ ] **KI-Workflow-Dokumentation** (`docs/tools-prompts.md`)
-- [ ] **Trade-offs & Annahmen** dokumentieren
-- [ ] **Finaler Commit** + Push zu GitHub
+- [x] **README.md** aktualisiert
+- [x] **KI-Workflow-Dokumentation** (`docs/tools-prompts.md`)
+- [x] **Trade-offs & Annahmen** dokumentiert
+- [x] **Finaler Commit** + Push zu GitHub
 
 ---
 
@@ -89,21 +95,22 @@
 
 | Meilenstein | Zeit | Definition of Done |
 |---|---|---|
-| Setup abgeschlossen | 0:20 | `ng serve` läuft, Datenmodell steht |
-| Daten geladen & transformiert | 0:50 | DataService liefert aggregierte Daten, Tests grün |
-| Dashboard sichtbar | 1:30 | Charts zeigen Auslastung, Wochen-Navigation |
-| Alle Komponenten fertig | 2:00 | No-Show + Behandlungsarten visualisiert |
-| Tests komplett | 2:20 | Alle Specs grün (`npm run test:ci`) |
-| CI/CD läuft | 2:35 | GitHub Actions Workflows getestet |
-| Abgabebereit | 3:00 | Alles dokumentiert, gedeployt auf GitHub Pages |
+| Setup abgeschlossen | ~0:20 | `ng serve` läuft, Datenmodell steht |
+| Daten geladen & transformiert | ~0:50 | DataService liefert aggregierte Daten, Tests grün |
+| Dashboard sichtbar | ~1:30 | Charts zeigen Auslastung, Wochen-Navigation |
+| Alle Komponenten fertig | ~2:00 | No-Show + Behandlungsarten visualisiert |
+| Tests komplett | ~2:20 | 23 Specs grün |
+| CI/CD läuft | ~2:35 | GitHub Actions Workflows getestet |
+| Abgabebereit | ~3:00 | Alles dokumentiert, gedeployt auf GitHub Pages |
 
 ---
 
-## Risiken & Puffer
+## Risiken & Puffer – was tatsächlich aufgetreten ist
 
-| Risiko | Puffer | Maßnahme |
+| Risiko | Eingetreten? | Maßnahme |
 |---|---|---|
-| SharePoint-JSON unzugänglich | 5 min | Mock-Daten aus Aufgabenbeschreibung generieren |
-| Angular/Chart-Library-Konflikte | 5 min | Auf stabile Versionen setzen (Chart.js 4.x) |
-| GitHub Pages Deployment | 5 min | Vorab dokumentieren, `angular-cli-ghpages` als Alternative |
-| Unerwartete UI-Probleme | 10 min | Minimalistisches Design → Material Defaults |
+| SharePoint-JSON unzugänglich | Nein | Daten lagen bereits als `data.json` im Repo |
+| Angular/Chart-Library-Konflikte | **Ja** | ng2-charts nicht standalone-kompatibel → Chart.js direkt genutzt |
+| Node.js-Version | **Ja** | Node 26 inkompatibel mit Angular 17 CLI → Workaround mit direktem node-Aufruf |
+| GitHub Pages Deployment | **Ja** | outputPath mehrfach korrigiert, von actions/deploy-pages auf peaceiris gewechselt |
+| Asset-Path falsch | **Ja** | data.json wurde als `assets/data/data.json` gesucht, lag aber in `assets/data.json` |
