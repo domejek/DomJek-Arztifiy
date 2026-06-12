@@ -72,7 +72,7 @@ describe('DataService', () => {
       expect(data[0].termin_id).toBe('T-001');
     });
 
-    const req = httpMock.expectOne('assets/data/data.json');
+    const req = httpMock.expectOne('assets/data.json');
     expect(req.request.method).toBe('GET');
     req.flush({ termine: mockAppointments });
   });

@@ -6,7 +6,7 @@ import { DailyStats, WeeklyStats, TreatmentStat } from '../models/stats.interfac
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
-  private readonly dataUrl = 'assets/data/data.json';
+  private readonly dataUrl = 'assets/data.json';
   private readonly WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   private readonly MINUTEN_PRO_ARZT = 540;
 

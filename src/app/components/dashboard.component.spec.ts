@@ -48,7 +48,7 @@ describe('DashboardComponent', () => {
 
     fixture.detectChanges();
 
-    httpMock.expectOne('assets/data/data.json').flush(mockData);
+    httpMock.expectOne('assets/data.json').flush(mockData);
     fixture.detectChanges();
   });
 
