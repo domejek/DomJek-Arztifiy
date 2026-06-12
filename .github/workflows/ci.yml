@@ -25,7 +25,7 @@ jobs:
         run: npm run lint -- --no-warnings || true
 
       - name: Test
-        run: npm run test:ci -- --no-watch --browsers=ChromeHeadless || npm test -- --watch=false --browsers=ChromeHeadless
+        run: npx ng test --no-watch --browsers=ChromeHeadless
 
       - name: Build
-        run: npm run build -- --base-href /DomJek-Arztifiy/
+        run: npx ng build --base-href /DomJek-Arztifiy/
