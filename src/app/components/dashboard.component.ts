@@ -144,7 +144,7 @@ export class DashboardComponent implements OnInit {
         this.alleTermine = termine;
         this.wochen = this.dataService.getWeeklyStats(termine);
         this.wochenIndex = this.wochen.length - 1;
-        this.treatmentStats = this.dataService.getTreatmentDistribution(termine);
+        this.updateTreatmentStats();
       }
       this.loading = false;
     });
@@ -167,11 +167,30 @@ export class DashboardComponent implements OnInit {
     return total > 0 ? Math.round((wahrgenommen / total) * 100) : 0;
   }
 
+  private updateTreatmentStats() {
+    if (!this.aktuelleWoche) return;
+    const start = this.aktuelleWoche.startDatum;
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const endStr = end.toISOString().slice(0, 10);
+    const gefiltert = this.alleTermine.filter(t => {
+      const d = t.datum.slice(0, 10);
+      return d >= start && d <= endStr;
+    });
+    this.treatmentStats = this.dataService.getTreatmentDistribution(gefiltert);
+  }
+
   vorherigeWoche() {
-    if (this.wochenIndex < this.wochen.length - 1) this.wochenIndex++;
+    if (this.wochenIndex < this.wochen.length - 1) {
+      this.wochenIndex++;
+      this.updateTreatmentStats();
+    }
   }
 
   naechsteWoche() {
-    if (this.wochenIndex > 0) this.wochenIndex--;
+    if (this.wochenIndex > 0) {
+      this.wochenIndex--;
+      this.updateTreatmentStats();
+    }
   }
 }
