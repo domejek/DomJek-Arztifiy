@@ -4,6 +4,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { catchError, of } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { Appointment } from '../models/appointment.interface';
 import { WeeklyStats, TreatmentStat } from '../models/stats.interface';
@@ -39,44 +40,57 @@ import { TreatmentDistributionComponent } from '../components/treatment-distribu
       </button>
     </mat-toolbar>
 
-    <div class="content" *ngIf="aktuelleWoche; else loading">
-      <app-kpi-cards
-        [durchschnittsAuslastung]="aktuelleWoche.durchschnittsAuslastung"
-        [noShowRate]="aktuelleWoche.gesamteNoShowRate"
-        [gesamtTermine]="gesamtTermine"
-        [wahrgenommenProzent]="wahrgenommenProzent"
-      ></app-kpi-cards>
-
-      <div class="chart-grid">
-        <mat-card class="chart-card full-width">
-          <mat-card-content>
-            <app-utilization-chart
-              [tage]="aktuelleWoche.tage"
-              [kw]="aktuelleWoche.kw"
-            ></app-utilization-chart>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="chart-card">
-          <mat-card-content>
-            <app-no-show-rate
-              [tage]="aktuelleWoche.tage"
-            ></app-no-show-rate>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="chart-card">
-          <mat-card-content>
-            <app-treatment-distribution
-              [stats]="treatmentStats"
-            ></app-treatment-distribution>
-          </mat-card-content>
-        </mat-card>
+    <div class="content" *ngIf="loading; else loaded">
+      <div class="loading">
+        <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+        <p>Daten werden geladen...</p>
       </div>
     </div>
 
-    <ng-template #loading>
-      <div class="loading">Daten werden geladen...</div>
+    <ng-template #loaded>
+      <div class="content error-state" *ngIf="error; else dashboard">
+        <mat-icon color="warn" class="error-icon">error</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-raised-button color="primary" (click)="loadData()">Erneut versuchen</button>
+      </div>
+    </ng-template>
+
+    <ng-template #dashboard>
+      <div class="content" *ngIf="aktuelleWoche">
+        <app-kpi-cards
+          [durchschnittsAuslastung]="aktuelleWoche.durchschnittsAuslastung"
+          [noShowRate]="aktuelleWoche.gesamteNoShowRate"
+          [gesamtTermine]="gesamtTermine"
+          [wahrgenommenProzent]="wahrgenommenProzent"
+        ></app-kpi-cards>
+
+        <div class="chart-grid">
+          <mat-card class="chart-card full-width">
+            <mat-card-content>
+              <app-utilization-chart
+                [tage]="aktuelleWoche.tage"
+                [kw]="aktuelleWoche.kw"
+              ></app-utilization-chart>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <app-no-show-rate
+                [tage]="aktuelleWoche.tage"
+              ></app-no-show-rate>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <app-treatment-distribution
+                [stats]="treatmentStats"
+              ></app-treatment-distribution>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
     </ng-template>
   `,
   styles: [`
@@ -86,7 +100,11 @@ import { TreatmentDistributionComponent } from '../components/treatment-distribu
     .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .chart-card { padding: 8px; }
     .full-width { grid-column: 1 / -1; }
-    .loading { text-align: center; padding: 48px; font-size: 18px; color: #666; }
+    .loading { text-align: center; padding: 80px 24px; font-size: 18px; color: #666; }
+    .loading-icon { font-size: 48px; height: 48px; width: 48px; margin-bottom: 16px; }
+    .error-state { text-align: center; padding: 80px 24px; }
+    .error-icon { font-size: 48px; height: 48px; width: 48px; margin-bottom: 16px; }
+    .error-state p { font-size: 16px; color: #666; margin-bottom: 24px; }
     @media (max-width: 768px) {
       .content { padding: 12px; }
       .chart-grid { grid-template-columns: 1fr; }
@@ -98,15 +116,37 @@ export class DashboardComponent implements OnInit {
   wochenIndex = 0;
   alleTermine: Appointment[] = [];
   treatmentStats: TreatmentStat[] = [];
+  loading = true;
+  error: string | null = null;
 
   constructor(private dataService: DataService) {}
 
   ngOnInit() {
-    this.dataService.loadAppointments().subscribe(termine => {
-      this.alleTermine = termine;
-      this.wochen = this.dataService.getWeeklyStats(termine);
-      this.wochenIndex = this.wochen.length - 1;
-      this.treatmentStats = this.dataService.getTreatmentDistribution(termine);
+    this.loadData();
+  }
+
+  loadData() {
+    this.loading = true;
+    this.error = null;
+    this.dataService.loadAppointments().pipe(
+      catchError(() => {
+        this.error = 'Daten konnten nicht geladen werden. Bitte versuche es später erneut.';
+        this.loading = false;
+        return of([]);
+      })
+    ).subscribe(termine => {
+      if (termine.length === 0 && !this.error) {
+        this.error = 'Keine Termindaten verfügbar.';
+        this.loading = false;
+        return;
+      }
+      if (termine.length > 0) {
+        this.alleTermine = termine;
+        this.wochen = this.dataService.getWeeklyStats(termine);
+        this.wochenIndex = this.wochen.length - 1;
+        this.treatmentStats = this.dataService.getTreatmentDistribution(termine);
+      }
+      this.loading = false;
     });
   }
 
