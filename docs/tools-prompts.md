@@ -6,10 +6,10 @@ Dokumentation des KI-Workflows für das Arztpraxis-Dashboard.
 
 ## Verwendete KI-Tools
 
-| Tool | Version / Modell | Einsatzbereich |
-|---|---|---|
-| Claude Code (opencode) | big-pickle | Planung, Code-Generierung, Refactoring, Troubleshooting |
-| GitHub Copilot | - | Autocomplete während der Entwicklung |
+| Tool     | Version / Modell | Einsatzbereich |
+|----------|------------------|---|
+| OpenCode | big-pickle & GLM | Planung, Code-Generierung, Refactoring, Troubleshooting |
+| GitHub Copilot | -                | Autocomplete während der Entwicklung |
 
 ---
 
